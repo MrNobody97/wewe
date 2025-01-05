@@ -56,7 +56,7 @@ var scriptConfig = {
             'This script has no demo video!': 'This script has no demo video!',
         },
     },
-    allowedMarkets: ['en', 'us', 'yy', 'pt', 'fr', 'br', 'de'],
+    allowedMarkets: ['en', 'us', 'yy', 'pt', 'fr', 'br', 'it'],
     allowedScreens: [],
     allowedModes: [],
     isDebug: DEBUG,
