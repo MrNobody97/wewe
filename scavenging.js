@@ -1,5 +1,7 @@
 // PROGRAM VARIABLES
 const PREFIX = "scavenge_optimizer_"; // Prefisso univoco per le chiavi nel localStorage
+const COUNTAPI_NAMESPACE = "fmthemasterScripts"; // Namespace per CountAPI
+const COUNTAPI_KEY = "optimizedScavenging"; // Chiave per CountAPI
 var count = 0;
 var nsteps = 200;
 var worker; // Parallel thread for calculations
@@ -16,7 +18,16 @@ var max_heavy = -1;
 
 var haulsPerUnit = { "spear": 25, "sword": 15, "axe": 10, "light": 80, "heavy": 50, "archer": 10, "marcher": 50, "knight": 0 };
 var lootFactors = { 0: 0.1, 1: 0.25, 2: 0.5, 3: 0.75 };
-var countapikey = "optimizedScavenging";
+
+// Funzione per incrementare il contatore su CountAPI
+function incrementCounter() {
+    const url = `https://api.countapi.xyz/hit/${COUNTAPI_NAMESPACE}/${COUNTAPI_KEY}`;
+    $.getJSON(url, function(response) {
+        console.log(`This script has been run ${response.value} times.`);
+    }).fail(function(error) {
+        console.error("Failed to update counter:", error);
+    });
+}
 
 // Funzione per verificare se un valore è un numero valido
 function isValidNumber(value, min = -Infinity, max = Infinity) {
@@ -47,33 +58,73 @@ function loadConfig(key, defaultValue) {
 
 // Aggiorna l'interfaccia con i valori memorizzati
 function inputMemory() {
-    hours = loadConfig("ScavengeTime", hours);
-    document.getElementById("hours").value = hours;
-
-    max_spear = loadConfig("max_spear", max_spear);
-    document.getElementById("max_spear").value = max_spear;
-
-    max_sword = loadConfig("max_sword", max_sword);
-    document.getElementById("max_sword").value = max_sword;
-
-    max_axe = loadConfig("max_axe", max_axe);
-    document.getElementById("max_axe").value = max_axe;
-
-    if (has_archer) {
-        max_archer = loadConfig("max_archer", max_archer);
-        document.getElementById("max_archer").value = max_archer;
+    const hoursInput = document.getElementById("hours");
+    if (hoursInput) {
+        hours = loadConfig("ScavengeTime", hours);
+        hoursInput.value = hours;
+    } else {
+        console.error("Elemento 'hours' non trovato nel DOM.");
     }
 
-    max_light = loadConfig("max_light", max_light);
-    document.getElementById("max_light").value = max_light;
-
-    if (has_archer) {
-        max_marcher = loadConfig("max_marcher", max_marcher);
-        document.getElementById("max_marcher").value = max_marcher;
+    const maxSpearInput = document.getElementById("max_spear");
+    if (maxSpearInput) {
+        max_spear = loadConfig("max_spear", max_spear);
+        maxSpearInput.value = max_spear;
+    } else {
+        console.error("Elemento 'max_spear' non trovato nel DOM.");
     }
 
-    max_heavy = loadConfig("max_heavy", max_heavy);
-    document.getElementById("max_heavy").value = max_heavy;
+    const maxSwordInput = document.getElementById("max_sword");
+    if (maxSwordInput) {
+        max_sword = loadConfig("max_sword", max_sword);
+        maxSwordInput.value = max_sword;
+    } else {
+        console.error("Elemento 'max_sword' non trovato nel DOM.");
+    }
+
+    const maxAxeInput = document.getElementById("max_axe");
+    if (maxAxeInput) {
+        max_axe = loadConfig("max_axe", max_axe);
+        maxAxeInput.value = max_axe;
+    } else {
+        console.error("Elemento 'max_axe' non trovato nel DOM.");
+    }
+
+    if (has_archer) {
+        const maxArcherInput = document.getElementById("max_archer");
+        if (maxArcherInput) {
+            max_archer = loadConfig("max_archer", max_archer);
+            maxArcherInput.value = max_archer;
+        } else {
+            console.error("Elemento 'max_archer' non trovato nel DOM.");
+        }
+    }
+
+    const maxLightInput = document.getElementById("max_light");
+    if (maxLightInput) {
+        max_light = loadConfig("max_light", max_light);
+        maxLightInput.value = max_light;
+    } else {
+        console.error("Elemento 'max_light' non trovato nel DOM.");
+    }
+
+    if (has_archer) {
+        const maxMarcherInput = document.getElementById("max_marcher");
+        if (maxMarcherInput) {
+            max_marcher = loadConfig("max_marcher", max_marcher);
+            maxMarcherInput.value = max_marcher;
+        } else {
+            console.error("Elemento 'max_marcher' non trovato nel DOM.");
+        }
+    }
+
+    const maxHeavyInput = document.getElementById("max_heavy");
+    if (maxHeavyInput) {
+        max_heavy = loadConfig("max_heavy", max_heavy);
+        maxHeavyInput.value = max_heavy;
+    } else {
+        console.error("Elemento 'max_heavy' non trovato nel DOM.");
+    }
 }
 
 // Accetta le configurazioni dall'interfaccia e le salva
@@ -161,12 +212,16 @@ function createInterface() {
         scavDiv.innerHTML = htmlString;
         document.getElementById("scavenge_screen").prepend(scavDiv.firstChild);
 
+        // Chiama inputMemory solo dopo aver creato l'interfaccia
         inputMemory();
     }
 }
 
 // Avvia lo script
 async function run_all() {
+    // Incrementa il contatore su CountAPI
+    incrementCounter();
+
     if (window.location.href.indexOf('screen=place&mode=scavenge') < 0) {
         window.location.assign(game_data.link_base_pure + "place&mode=scavenge");
     }
